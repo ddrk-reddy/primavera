@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Primavera Tables</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { color: #2c3e50; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tr:hover { background-color: #f9f9f9; }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 16px;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h2>Select Tables</h2>
+    
+    <form method="post" action="/columns">
+        <!-- Preserve login details -->
+        <input type="hidden" name="username" value="{{ username }}">
+        <input type="hidden" name="password" value="{{ password }}">
+        <input type="hidden" name="primavera_url" value="{{ primavera_url }}">
+
+        <table>
+            <tr>
+                <th><center>Select</center></th>
+                <th><center>Table Name</center></th>
+                <th><center>Type</center></th>
+            </tr>
+            {% for t in tables %}
+            <tr>
+                <td><center><input type="checkbox" name="tables" value="{{ t.physicalTableName }}"></center></td>
+                <td><center>{{ t.displayTableName }}</center></td>
+                <td><center>{{ t.tableType }}</center></td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <button type="submit" class="btn">Display Columns</button>
+    </form>
+</body>
+</html>
