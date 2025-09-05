@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Primavera Columns</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { color: #2c3e50; text-align: center; }
+
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; position: sticky; top: 0; z-index: 2; }
+        tr:hover { background-color: #f9f9f9; }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: #fff;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: #2980b9; }
+
+        /* ✅ Sticky bottom buttons */
+        .btn-bottom {
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h2>Columns of Selected Tables</h2>
+
+    <!-- ✅ Top buttons -->
+    <div class="btn-container">
+        <form method="post" action="/list_of_tables" style="display:inline;">
+            <input type="hidden" name="username" value="{{ username }}">
+            <input type="hidden" name="password" value="{{ password }}">
+            <input type="hidden" name="primavera_url" value="{{ primavera_url }}">
+            <button type="submit" class="btn">⬅ Back to Tables</button>
+        </form>
+        <button type="submit" form="columnsForm" class="btn">Display Data</button>
+    </div>
+
+    <!-- ✅ Main Form -->
+    <form id="columnsForm" method="post" action="/columns">
+        <input type="hidden" name="username" value="{{ username }}">
+        <input type="hidden" name="password" value="{{ password }}">
+        <input type="hidden" name="primavera_url" value="{{ primavera_url }}">
+
+        {% if columns %}
+            {% for table, cols in columns.items() %}
+                <h3>{{ table }}</h3>
+                <table>
+                    <tr>
+                        <th>Select</th>
+                        <th>Table Name</th>
+                        <th>Column Name</th>
+                        <th>Sync Config Code</th>
+                        <th>Display Name</th>
+                        <th>Data Type</th>
+                        <th>Physical Data Type</th>
+                        <th>Is PK</th>
+                        <th>Is FK</th>
+                        <th>FK Table Name</th>
+                        <th>Table Type</th>
+                    </tr>
+                    {% for col in cols|sort(attribute='columnName') %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_columns" value="{{ table }}:{{ col.columnName }}"></td>
+                        <td>{{ col.tableName }}</td>
+                        <td>{{ col.columnName }}</td>
+                        <td>{{ col.syncConfigCode }}</td>
+                        <td>{{ col.displayName }}</td>
+                        <td>{{ col.dataType }}</td>
+                        <td>{{ col.physicalDataType }}</td>
+                        <td>{{ col.isPK }}</td>
+                        <td>{{ col.isFK }}</td>
+                        <td>{{ col.fkTableName if col.fkTableName else "-" }}</td>
+                        <td>{{ col.tableType }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No columns found.</p>
+        {% endif %}
+    </form>
+
+    <!-- ✅ Sticky bottom buttons -->
+    <div class="btn-container btn-bottom">
+        <form method="post" action="/list_of_tables" style="display:inline;">
+            <input type="hidden" name="username" value="{{ username }}">
+            <input type="hidden" name="password" value="{{ password }}">
+            <input type="hidden" name="primavera_url" value="{{ primavera_url }}">
+            <button type="submit" class="btn">⬅ Back to Tables</button>
+        </form>
+        <button type="submit" form="columnsForm" class="btn">Display Data</button>
+    </div>
+</body>
+</html>

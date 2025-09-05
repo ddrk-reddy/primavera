@@ -15,9 +15,11 @@ def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-
+# ---------------------------
+# Route: Fetch Tables
+# ---------------------------
 @app.post("/list_of_tables", response_class=HTMLResponse)
-def login(
+def list_of_tables(
     request: Request,
     username: str = Form(...),
     password: str = Form(...),
@@ -42,8 +44,10 @@ def login(
                 "error": f"Primavera error {r.status_code}: {r.text}"
             })
 
-        # FIX: response is already a list of tables
         tables = r.json()
+
+        # sort alphabetically by displayTableName
+        tables = sorted(tables, key=lambda x: x.get("displayTableName", ""))
 
         return templates.TemplateResponse("tables.html", {
             "request": request,
@@ -58,6 +62,7 @@ def login(
             "request": request,
             "error": f"Error: {str(e)}"
         })
+
 
 # ---------------------------
 # Route: Show Columns of Selected Tables
@@ -74,8 +79,8 @@ def show_columns(
         selected_columns = {}
 
         for table in tables:
-            # Build URL for each table's columns
             columns_url = f"{primavera_url}/pds/rest-service/dataservice/metadata/columns/{table}?configCode=ds_p6adminuser"
+            print("DEBUG → Fetching columns for:", table)
 
             r = requests.get(
                 columns_url,
@@ -83,14 +88,24 @@ def show_columns(
                 headers={"Accept": "application/json"}
             )
 
+            print("DEBUG → Status:", r.status_code)
+            print("DEBUG → Response:", r.text[:500])
+
             if r.status_code == 200:
-                selected_columns[table] = r.json().get("columns", [])
+                data = r.json()
+                if isinstance(data, list):
+                    selected_columns[table] = data
+                else:
+                    selected_columns[table] = data.get("columns", [])
             else:
-                selected_columns[table] = [f"Error {r.status_code}: {r.text}"]
+                selected_columns[table] = [{"error": f"Error {r.status_code}: {r.text}"}]
 
         return templates.TemplateResponse("columns.html", {
             "request": request,
-            "columns": selected_columns
+            "columns": selected_columns,
+            "username": username,          # ✅ preserve login details
+            "password": password,
+            "primavera_url": primavera_url
         })
 
     except Exception as e:
