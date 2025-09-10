@@ -7,11 +7,12 @@
 </head>
 <body style="font-family: Arial, sans-serif; margin:0; height:100vh; display:flex; justify-content:center; align-items:center; background-image:url('https://images.unsplash.com/photo-1503387762-592deb58ef4e'); background-size:cover; background-position:center;">
 
-    <div style="width:320px; padding:25px; border-radius:12px; background:rgba(255,255,255,0.95); box-shadow:0 8px 20px rgba(0,0,0,0.3); text-align:center;">
+    <div style="width:320px; padding:25px; border-radius:12px; background:rgba(255,255,255,0.95); box-shadow:0 8px 20px rgba(0,0,0,0.9); text-align:center;">
         
         <!-- Title Logo -->
         <div style="margin-bottom:15px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Primavera Logo" style="width:70px; margin-bottom:10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Primavera Logo" style="width:100px; margin-bottom:10px;">
+            <!--<h1 style="color:#2c3e50; margin:0;">Monadelphous</h1>-->
             <h2 style="color:#2c3e50; margin:0;">Primavera Login</h2>
         </div>
 
@@ -25,11 +26,11 @@
             <!-- Password Field with Toggle -->
             <div style="position:relative; width:100%; margin:10px 0;">
                 <input type="password" id="password" name="password" placeholder="Password" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px;">
-                <span onclick="togglePassword()" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px; color:#2c3e50;">👁️</span>
+                <span onclick="togglePassword()" style="position:absolute; right:0px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px; color:#2c3e50;">👁️</span>
             </div>
 
             <!-- Primavera Base URL -->
-            <input type="text" name="primavera_url" placeholder="Primavera URL (e.g. https://au1.p6.oraclecloud.com/monadelphous)" required style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:6px;">
+            <input type="text" name="primavera_url" placeholder="Primavera URL" required style="width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:6px;">
 
             <button type="submit" style="width:100%; padding:12px; background:#2c3e50; color:white; font-size:16px; border:none; border-radius:6px; cursor:pointer;">Sign In</button>
         </form>

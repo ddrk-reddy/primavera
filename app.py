@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import requests
+from typing import List, Optional
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -45,8 +46,6 @@ def list_of_tables(
             })
 
         tables = r.json()
-
-        # sort alphabetically by displayTableName
         tables = sorted(tables, key=lambda x: x.get("displayTableName", ""))
 
         return templates.TemplateResponse("tables.html", {
@@ -73,7 +72,7 @@ def show_columns(
     username: str = Form(...),
     password: str = Form(...),
     primavera_url: str = Form(...),
-    tables: list[str] = Form(...)
+    tables: List[str] = Form(...)
 ):
     try:
         selected_columns = {}
@@ -103,7 +102,7 @@ def show_columns(
         return templates.TemplateResponse("columns.html", {
             "request": request,
             "columns": selected_columns,
-            "username": username,          # ✅ preserve login details
+            "username": username,
             "password": password,
             "primavera_url": primavera_url
         })
@@ -112,4 +111,84 @@ def show_columns(
         return templates.TemplateResponse("tables.html", {
             "request": request,
             "error": f"Error fetching columns: {str(e)}"
+        })
+
+
+# ---------------------------
+# Route: Display Data
+# ---------------------------
+@app.post("/data", response_class=HTMLResponse)
+def display_data(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    primavera_url: str = Form(...),
+    selected_columns: Optional[List[str]] = Form(None)
+):
+    if not selected_columns:
+        return templates.TemplateResponse("columns.html", {
+            "request": request,
+            "error": "⚠️ You must select at least one column.",
+            "columns": {},  # you could re-fetch if you want
+            "username": username,
+            "password": password,
+            "primavera_url": primavera_url
+        })
+
+    # ✅ Build table-to-columns mapping
+    tables_dict = {}
+    for col in selected_columns:
+        table, column = col.split(":")
+        tables_dict.setdefault(table, []).append(column)
+
+    payload = {
+        "name": "MyQuery",
+        "sinceDate": None,
+        "tables": [{"tableName": t, "columns": cols} for t, cols in tables_dict.items()]
+    }
+
+    print("DEBUG → Payload:", payload)
+
+    try:
+        r = requests.post(
+            f"{primavera_url}/pds/rest-service/dataservice/runquery?configCode=ds_p6adminuser",
+            json=payload,
+            auth=(username, password),
+            headers={"Accept": "application/json"}
+        )
+
+        print("DEBUG → Status:", r.status_code)
+        print("DEBUG → Response:", r.text[:500])
+
+        if r.status_code != 200:
+            return templates.TemplateResponse("data.html", {
+                "request": request,
+                "error": f"Error {r.status_code}: {r.text}",
+                "data": None,
+                "username": username,
+                "password": password,
+                "primavera_url": primavera_url,
+                "tables": list(tables_dict.keys())  # ✅ send tables back
+            })
+
+        data = r.json()
+
+        return templates.TemplateResponse("data.html", {
+            "request": request,
+            "data": data,
+            "username": username,
+            "password": password,
+            "primavera_url": primavera_url,
+            "tables": list(tables_dict.keys())  # ✅ send tables back
+        })
+
+    except Exception as e:
+        return templates.TemplateResponse("data.html", {
+            "request": request,
+            "error": f"Exception: {str(e)}",
+            "data": None,
+            "username": username,
+            "password": password,
+            "primavera_url": primavera_url,
+            "tables": list(tables_dict.keys())  # ✅ send tables back
         })

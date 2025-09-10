@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Primavera Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin:0; background-color: #eaeaea; }
+        h1 { color: #2c3e50; text-align: center; margin: 10px; }
+
+        table { border-collapse: collapse; width: 95%; margin: 20px auto; background: white; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: center; }
+        th { background-color: #2c3e50; color: white; }
+        tr:hover td { background-color: #ddd; }
+
+        .btn-container { display: flex; justify-content: center; gap: 15px; margin: 20px; }
+        .btn {
+            background-color: #7434db;
+            color: white;
+            padding: 10px 20px;
+            border: 2px solid black;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background-color: #5917c5;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Query Results</h1>
+
+    {% if error %}
+        <p style="color:red; text-align:center;">{{ error }}</p>
+    {% endif %}
+
+    {% if data and data['data'] %}
+        {% for table_name, rows in data['data'].items() %}
+            <h2 style="text-align:center;">{{ table_name }}</h2>
+            {% if rows %}
+                <table>
+                    <thead>
+                        <tr>
+                            {% for col in rows[0].keys() %}
+                                <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        <tr>
+                            {% for val in row.values() %}
+                                <td>{{ val }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="text-align:center;">⚠️ No rows for {{ table_name }}</p>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p style="text-align:center;">⚠️ No data found.</p>
+    {% endif %}
+
+    <div class="btn-container">
+        <!-- Back to Columns -->
+        <form method="post" action="/columns" style="display:inline;">
+            <input type="hidden" name="username" value="{{ username }}">
+            <input type="hidden" name="password" value="{{ password }}">
+            <input type="hidden" name="primavera_url" value="{{ primavera_url }}">
+            {% for t in tables %}
+                <input type="hidden" name="tables" value="{{ t }}">
+            {% endfor %}
+            <button type="submit" class="btn">⬅ Back to Columns</button>
+        </form>
+
+        <!-- Back to Tables -->
+        <form method="post" action="/list_of_tables" style="display:inline;">
+            <input type="hidden" name="username" value="{{ username }}">
+            <input type="hidden" name="password" value="{{ password }}">
+            <input type="hidden" name="primavera_url" value="{{ primavera_url }}">
+            <button type="submit" class="btn">⬅ Back to Tables</button>
+        </form>
+    </div>
+</body>
+</html>
